@@ -25,7 +25,6 @@ const char* password = "your-password";  // Wifi password, if any
 const char* host = "192.168.1.3";
 String apikey = "b0660d27cc88ee1a916b7bbb4b9f8baf";
 String nodeid = "25";
-//String csv="6";
 String url = "/emoncms/input/post.json?apikey="+apikey+"&node="+nodeid+"&csv=";
 
 // Remote Emoncms 
@@ -56,64 +55,40 @@ void setup() {
   Serial.println("WiFi connected");  
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-
-  // Setup Gpio 2
-  pinMode(2, OUTPUT);
-  digitalWrite(2, LOW); 
 }
-
-//int value = 0;
-
 void loop() {
-/*
-  // Set output high
-  Serial.println("Gpio 2 high");
-  pinMode(2, OUTPUT);
-  digitalWrite(2, HIGH);
-  // Wait for capacitor to charge
-  delay(500);          
-  // Set Gpio2 to input
-  digitalWrite(2, LOW);
-  pinMode(2, INPUT);
-
-  // Wait while capacitor discharges and count how long it takes
-  unsigned long startTime = micros();
-  // Measure discharge time and use a timeout. If its really dark, we get stuck here otherwise. 
-  while (digitalRead(2) == HIGH && micros()-startTime < 1000000) {
-  }
-  unsigned int time = micros() - startTime;
-  Serial.print ("Light level: ");
-  Serial.println(time);
-*/
-
 /* 
  *  
  *  Measure solar cell voltage
  */
  int adc = analogRead(A0);
  double Voltage;
+ double realVoltage; // Real voltage, before the voltage divider
 // The ESP:s ADC can be up to 1V, so we dont have to adjust for the supply voltage
 Voltage = adc / 1023.0;
+realVoltage = Voltage * 11,0; // Divider with 10k/1k gives a factor of about 11
 
  Serial.print("Solar voltage (raw):");
  Serial.println(adc);
  Serial.println(Voltage);
+ Serial.println(realVoltage);
  
-
-int time=25;
-  // Add count to url
-  String newurl="";
-  newurl=url + String(time);
+  // Add voltage to url
+  //String newurl="";
+  //newurl=url + String(realVoltage);
   String newremoteurl="";
-  newremoteurl=remoteurl + String(time) + "&apikey="+remoteapikey;
+  newremoteurl=remoteurl + String(realVoltage) + "&apikey="+remoteapikey;
 
+  // Use WiFiClient class to create TCP connections
+  WiFiClient client;
+  const int httpPort = 80;
+/*
   // Connect to host
   Serial.print("connecting to ");
   Serial.println(host);
   
-  // Use WiFiClient class to create TCP connections
-  WiFiClient client;
-  const int httpPort = 80;
+
+  
   if (!client.connect(host, httpPort)) {
     Serial.println("connection failed");
     return;
@@ -136,7 +111,7 @@ int time=25;
   
   Serial.println();
   Serial.println("closing connection");
-
+*/
   // Connect to remote Emoncms
     // Connect to host
   Serial.print("connecting to ");
